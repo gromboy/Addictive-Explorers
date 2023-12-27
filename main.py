@@ -5,6 +5,8 @@ import pygame
 FPS = 10  # Устанавливаем желаемое количество кадров в секунду
 
 # Функция для загрузки изображений, используется для создания спрайтов
+
+
 def load_image(name, colorkey=None):
     # Путь к файлу изображения
     fullname = os.path.join('data', name)
@@ -81,6 +83,16 @@ class Hero(pygame.sprite.Sprite):
         self.cur_frame = self.directions[self.direction][2]
         self.image = self.frames[self.cur_frame]
 
+
+class Shop(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(all_sprites)  # Инициализация спрайта
+        self.image = load_image('shop.png')  # Устанавливаем изображение
+        self.rect = self.rect.move(x, y)  # Устанавливаем положение магазина на экране
+    def move(self, x, y):
+        self.moving = True
+
+
 # Основная функция программы
 def main():
     # Настройки окна и отображения
@@ -93,11 +105,12 @@ def main():
     # Создание группы спрайтов
     all_sprites = pygame.sprite.Group()
     clock = pygame.time.Clock()  # Создание объекта для отслеживания времени
-    bg = pygame.sprite.Sprite(all_sprites)  # Фоновый спрайт
+    #bg = pygame.sprite.Sprite(all_sprites)  # Фоновый спрайт
     # Создание экземпляра героя
     hero = Hero(load_image("main_character.png"), 4, 7, 0, 0)
-    bg.image = load_image('background.png')  # Установка изображения фона
-    bg.rect = bg.image.get_rect()
+    shop = Shop()
+    #bg.image = load_image('background.png')  # Установка изображения фона
+    #bg.rect = bg.image.get_rect()
 
     # Основной игровой цикл
     while running:
