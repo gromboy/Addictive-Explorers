@@ -1,126 +1,200 @@
 import os
 import sys
+
 import pygame
 
-FPS = 10  # Устанавливаем желаемое количество кадров в секунду
+pygame.init()
 
-# Функция для загрузки изображений, используется для создания спрайтов
+FPS = 10
+
+
 def load_image(name, colorkey=None):
-    # Путь к файлу изображения
     fullname = os.path.join('data', name)
-    # Проверка наличия файла
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
-    # Загрузка изображения в pygame
     image = pygame.image.load(fullname)
     if colorkey is not None:
-        # Если указан параметр colorkey, настраиваем прозрачность
         image = image.convert()
         if colorkey == -1:
             colorkey = image.get_at((0, 0))
         image.set_colorkey(colorkey)
     else:
-        # Иначе используем альфа-канал для прозрачности
         image = image.convert_alpha()
     return image
 
-# Класс героя, который наследуется от pygame.sprite.Sprite
-class Hero(pygame.sprite.Sprite):
+
+class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(all_sprites)  # Инициализация спрайта
-        self.frames = []  # Список кадров анимации героя
-        self.cut_sheet(sheet, columns, rows)  # Вырезаем кадры из спрайта
-        self.cur_frame = 1  # Текущий кадр анимации
-        self.image = self.frames[self.cur_frame]  # Устанавливаем изображение для текущего кадра
-        self.rect = self.rect.move(x, y)  # Устанавливаем положение героя на экране
-        self.moving = False  # Флаг для движения героя
-        # Скорость перемещения
+        super().__init__(all_sprites)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+
+class BackGround(AnimatedSprite):
+    def __init__(self, sheet, columns, rows, x=0, y=0):
+        super().__init__(sheet, columns, rows, x, y)
+
+    def next_level(self):
+        self.cur_frame = (self.cur_frame + 1) % 5
+        self.image = self.frames[self.cur_frame]
+
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(all_sprites)
+        self.add(coins_on_map)
+        self.image = load_image('coin.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self):
+        if pygame.sprite.spritecollideany(hero, coins_on_map):
+            hero.coins += 1
+            self.kill()
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(all_sprites)
+        self.image = load_image('enemy.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Hero(AnimatedSprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(sheet, columns, rows, x, y)
+        self.moving = False
+        # speed
         self.pix = 9
-        # Направления движения и их соответствующие клавиши
         self.directions = {pygame.K_DOWN: (0, self.pix, 0),
                            pygame.K_UP: (0, -self.pix, 1),
                            pygame.K_LEFT: (-self.pix, 0, 2),
                            pygame.K_RIGHT: (self.pix, 0, 3)}
-        self.direction = pygame.K_UP  # Начальное направление - вверх
+        self.direction = pygame.K_UP
+        self.new_rect = pygame.sprite.Sprite(all_sprites)
+        self.new_rect.image = pygame.Surface((47, 47), pygame.SRCALPHA, 32)
+        self.new_rect.rect = pygame.Rect(x, y, 47, 47)
+        self.new_rect.mask = pygame.mask.from_surface(self.new_rect.image)
+        self.coins = 0
 
-    # Метод для вырезания кадров из спрайта
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows - 1):
             for i in range(columns):
                 frame_location = (self.rect.w * i, self.rect.h * j)
-                # Вырезаем кадр из спрайта и добавляем в список кадров анимации
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
 
-    # Метод обновления состояния героя
     def update(self):
         if self.moving:
-            # Анимация движения героя
             self.cur_frame = (self.cur_frame + 4) % len(self.frames)
             self.image = self.frames[self.cur_frame]
-            # Вычисляем новое положение героя при движении
             to_move = self.rect.move(*self.directions[self.direction][0:2])
             x, y = to_move.x, to_move.y
-            # Проверка на выход за границы экрана
+            self.new_rect.rect = pygame.Rect(x, y, 47, 47)
+            for i in trees:
+                if pygame.sprite.collide_rect(self.new_rect, i):
+                    return
             if x < 0 or y < 0 or x > width - 47 or y > height - 47:
                 return
             self.rect = to_move
+        print(self.coins)
 
-    # Метод для начала движения героя в определенном направлении
     def move(self, direction):
         self.moving = True
         self.direction = direction
         self.cur_frame = self.directions[direction][2]
 
-    # Метод для остановки движения героя
     def stop_move(self):
         self.moving = False
         self.cur_frame = self.directions[self.direction][2]
         self.image = self.frames[self.cur_frame]
 
-# Основная функция программы
+
+class Tree(AnimatedSprite):
+    def __init__(self, sheet, x, y, type, group):
+        super().__init__(sheet, 1, 2, x, y)
+        self.type = type
+        self.add(group)
+        if self.type == 0:
+            self.change_type(0)
+        elif self.type == 1:
+            self.change_type(1)
+        else:
+            raise ValueError
+
+    def change_type(self, typ):
+        self.type = typ
+        self.cur_frame = self.type
+        self.image = self.frames[self.cur_frame]
+        self.mask = pygame.mask.from_surface(self.image)
+
+
 def main():
-    # Настройки окна и отображения
-    global all_sprites, width, height
+    # settings
+    global all_sprites, width, height, trees, screen, coins_on_map, hero
     size = width, height = 800, 450
-    screen = pygame.display.set_mode(size)  # Создание окна
-    pygame.display.set_caption('Addictive Explorers')  # Установка заголовка окна
-    running = True  # Флаг для работы программы
-
-    # Создание группы спрайтов
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption('Addictive Explorers')
+    running = True
+    # settings
     all_sprites = pygame.sprite.Group()
-    clock = pygame.time.Clock()  # Создание объекта для отслеживания времени
-    bg = pygame.sprite.Sprite(all_sprites)  # Фоновый спрайт
-    # Создание экземпляра героя
+    clock = pygame.time.Clock()
+    bg = BackGround(load_image('background-sheet.png'), 5, 1)
     hero = Hero(load_image("main_character.png"), 4, 7, 0, 0)
-    bg.image = load_image('background.png')  # Установка изображения фона
-    bg.rect = bg.image.get_rect()
-
-    # Основной игровой цикл
+    trees = pygame.sprite.Group()
+    coins_on_map = pygame.sprite.Group()
+    Tree(load_image('trees.png'), 100, 100, 0, trees)
+    Tree(load_image('trees.png'), 300, 100, 1, trees)
+    Tree(load_image('trees.png'), 200, 350, 1, trees)
+    key_translator = {pygame.K_w: pygame.K_UP,
+                      pygame.K_s: pygame.K_DOWN,
+                      pygame.K_a: pygame.K_LEFT,
+                      pygame.K_d: pygame.K_RIGHT}
+    coins = [(100, 100), (200, 200), (400, 350)]
+    for x, y in coins:
+        Coin(x, y)
     while running:
-        for event in pygame.event.get():  # Обработка событий
-            if event.type == pygame.QUIT:  # Обработка события выхода из программы
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN and event.key in (
-                    pygame.K_DOWN, pygame.K_UP, pygame.K_LEFT, pygame.K_RIGHT):
-                # Обработка нажатия клавиш для движения героя
-                hero.move(event.key)
+                    pygame.K_DOWN, pygame.K_UP, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_w, pygame.K_a, pygame.K_s,
+                    pygame.K_d):
+                try:
+                    hero.move(key_translator[event.key])
+                except KeyError:
+                    hero.move(event.key)
             if event.type == pygame.KEYUP and event.key in (
-                    pygame.K_DOWN, pygame.K_UP, pygame.K_LEFT, pygame.K_RIGHT):
-                # Обработка отпускания клавиш и остановки движения героя
+                    pygame.K_DOWN, pygame.K_UP, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_w, pygame.K_a, pygame.K_s,
+                    pygame.K_d):
                 hero.stop_move()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                bg.next_level()
+        screen.fill('black')
+        all_sprites.draw(screen)
+        all_sprites.update()
+        pygame.display.flip()
+        clock.tick(FPS)
+    pygame.quit()
 
-        screen.fill('black')  # Заливка экрана черным цветом
-        all_sprites.draw(screen)  # Отрисовка всех спрайтов на экране
-        all_sprites.update()  # Обновление состояния спрайтов
-        pygame.display.flip()  # Обновление экрана
-        clock.tick(FPS)  # Ограничение частоты кадров
 
-    pygame.quit()  # Закрытие Pygame
-
-# Запуск основной функции программы, если файл запускается напрямую
 if __name__ == '__main__':
     main()
