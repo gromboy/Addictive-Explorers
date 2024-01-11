@@ -1,8 +1,13 @@
 import os
 import sys
 import pygame
-
+from pygame.sprite import spritecollideany
+size = width, height = 800, 450
+screen = pygame.display.set_mode(size)
 FPS = 10  # Устанавливаем желаемое количество кадров в секунду
+DMGLVLUP = 5
+HPLVLUP = True
+REGENERATION = True
 
 # Функция для загрузки изображений, используется для создания спрайтов
 
@@ -27,7 +32,10 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+
 # Класс героя, который наследуется от pygame.sprite.Sprite
+
+
 class Hero(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites)  # Инициализация спрайта
@@ -45,6 +53,7 @@ class Hero(pygame.sprite.Sprite):
                            pygame.K_LEFT: (-self.pix, 0, 2),
                            pygame.K_RIGHT: (self.pix, 0, 3)}
         self.direction = pygame.K_UP  # Начальное направление - вверх
+        self.coins = 0
 
     # Метод для вырезания кадров из спрайта
     def cut_sheet(self, sheet, columns, rows):
@@ -84,21 +93,110 @@ class Hero(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
+class Shop_menu(pygame.sprite.Sprite):
+    image = load_image("shop.png")
+
+    def __init__(self, group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно !!!
+        super().__init__(group)
+        self.image = Shop_menu.image
+        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = 10
+        self.rect.y = 10
+
 class Shop(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(all_sprites)  # Инициализация спрайта
-        self.image = load_image('shop.png')  # Устанавливаем изображение
-        self.rect = self.rect.move(x, y)  # Устанавливаем положение магазина на экране
-    def move(self, x, y):
-        self.moving = True
+    image = load_image("shop.png")
+
+    def __init__(self, group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно !!!
+        super().__init__(group)
+        self.image = Shop.image
+        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = 10
+        self.rect.y = 10
+
+
+
+class Dmgup(pygame.sprite.Sprite):
+    image = load_image("shop.png")
+
+    def __init__(self, group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно !!!
+        super().__init__(group)
+        self.image = Dmgup.image
+        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = 10
+        self.rect.y = 10
+
+
+class Hpup(pygame.sprite.Sprite):
+    image = load_image("shop.png")
+
+    def __init__(self, group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно !!!
+        super().__init__(group)
+        self.image = Hpup.image
+        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = 10
+        self.rect.y = 10
+
+
+class Exit(pygame.sprite.Sprite):
+    image = load_image("shop.png")
+
+    def __init__(self, group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно !!!
+        super().__init__(group)
+        self.image = Exit.image
+        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = 10
+        self.rect.y = 10
+
+
+def shop_exist():
+    running_shop = True
+    size = width, height = 800, 450
+    screen_shop = pygame.display.set_mode(size)
+    while running_shop:
+        Shop_menu(all_sprites_shop)
+        Exit(all_sprites_shop)
+        Dmgup(all_sprites_shop)
+        Hpup(all_sprites_shop)
+        screen_shop.fill(pygame.Color('black'))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running_shop = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for bomb in all_sprites:
+                    bomb.update(event)
+            all_sprites_shop.draw(screen_shop)
+            pygame.display.flip()
+            # реакция на нажатие мыши
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Сохраняем координаты курсора
+                x1, y1 = event.pos
+                # если курсор не попал в область квадрата, координаты обнуляем
+                #
+
+
+all_sprites_shop = pygame.sprite.Group()
 
 
 # Основная функция программы
 def main():
     # Настройки окна и отображения
     global all_sprites, width, height
-    size = width, height = 800, 450
-    screen = pygame.display.set_mode(size)  # Создание окна
+  # Создание окна
     pygame.display.set_caption('Addictive Explorers')  # Установка заголовка окна
     running = True  # Флаг для работы программы
 
@@ -108,7 +206,7 @@ def main():
     #bg = pygame.sprite.Sprite(all_sprites)  # Фоновый спрайт
     # Создание экземпляра героя
     hero = Hero(load_image("main_character.png"), 4, 7, 0, 0)
-    shop = Shop()
+    shop = Shop(all_sprites_shop)
     #bg.image = load_image('background.png')  # Установка изображения фона
     #bg.rect = bg.image.get_rect()
 
@@ -125,13 +223,16 @@ def main():
                     pygame.K_DOWN, pygame.K_UP, pygame.K_LEFT, pygame.K_RIGHT):
                 # Обработка отпускания клавиш и остановки движения героя
                 hero.stop_move()
-
+            if spritecollideany(hero, all_sprites) == 'coin':
+                hero.coins += 1
+                spritecollideany(hero, all_sprites).kill()
+            if spritecollideany(hero, all_sprites) == 'shop':
+                shop_exist()
         screen.fill('black')  # Заливка экрана черным цветом
         all_sprites.draw(screen)  # Отрисовка всех спрайтов на экране
         all_sprites.update()  # Обновление состояния спрайтов
         pygame.display.flip()  # Обновление экрана
         clock.tick(FPS)  # Ограничение частоты кадров
-
     pygame.quit()  # Закрытие Pygame
 
 # Запуск основной функции программы, если файл запускается напрямую
