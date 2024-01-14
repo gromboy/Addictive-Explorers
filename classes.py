@@ -66,12 +66,10 @@ class Hero(pygame.sprite.Sprite):
 
 
 class Shop(pygame.sprite.Sprite):
-    image = load_image("shop_sprite.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Shop.image
+        self.image = load_image("shop_sprite.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -84,12 +82,10 @@ class Shop(pygame.sprite.Sprite):
 
 
 class Shopmenu(pygame.sprite.Sprite):
-    image = load_image("shop.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Shopmenu.image
+        self.image = load_image("shop.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -98,12 +94,10 @@ class Shopmenu(pygame.sprite.Sprite):
 
 
 class Dmgup(pygame.sprite.Sprite):
-    image = load_image("dmgup.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Dmgup.image
+        self.image = load_image("dmgup.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -123,12 +117,10 @@ class Dmgup(pygame.sprite.Sprite):
 
 
 class Hpup(pygame.sprite.Sprite):
-    image = load_image("hpup.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Hpup.image
+        self.image = load_image("hpup.png")
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
         self.rect.x = 200
@@ -147,12 +139,10 @@ class Hpup(pygame.sprite.Sprite):
 
 
 class ExitShop(pygame.sprite.Sprite):
-    image = load_image("shop.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Exit.image
+        self.image = load_image("shop.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -165,12 +155,10 @@ class ExitShop(pygame.sprite.Sprite):
 
 
 class Exit(pygame.sprite.Sprite):
-    image = load_image("shop.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Exit.image
+        self.image = load_image("exit.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -184,12 +172,10 @@ class Exit(pygame.sprite.Sprite):
 
 
 class Monster(pygame.sprite.Sprite):
-    image = load_image("monster.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Monster.image
+        self.image = load_image("monster.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -202,13 +188,11 @@ class Monster(pygame.sprite.Sprite):
 
 
 class Battle(pygame.sprite.Sprite):
-    image = load_image("battle.png")
-
     def __init__(self, group):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
-        # Это очень важно !!!
         super().__init__(group)
-        self.image = Battle.image
+
+        self.image = load_image("battle.png")
+
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -216,12 +200,10 @@ class Battle(pygame.sprite.Sprite):
 
 
 class Damage(pygame.sprite.Sprite):
-    image = load_image("damage.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Damage.image
+        self.image = load_image("damage.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -238,12 +220,10 @@ class Damage(pygame.sprite.Sprite):
 
 
 class Heal(pygame.sprite.Sprite):
-    image = load_image("heal.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Heal.image
+        self.image = load_image("heal.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -263,12 +243,10 @@ class Heal(pygame.sprite.Sprite):
 
 
 class Coin(pygame.sprite.Sprite):
-    image = load_image("coin.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Hpup.image
+        self.image = load_image("coin.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -281,11 +259,9 @@ class Coin(pygame.sprite.Sprite):
 
 
 class Menu(pygame.sprite.Sprite):
-    image = load_image("menu.png")
-
     def __init__(self, group):
         super().__init__(group)
-        self.image = Menu.image
+        self.image = load_image("menu.png")
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -293,12 +269,10 @@ class Menu(pygame.sprite.Sprite):
 
 
 class Start(pygame.sprite.Sprite):
-    image = load_image("start.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Start.image
+        self.image = load_image("start.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -325,17 +299,13 @@ class Load(pygame.sprite.Sprite):
 
     def update(self, *args):
         if args and self.rect.collidepoint(args[0].pos):
-            save_progress()
+            load_progress()
 
 
 class End(pygame.sprite.Sprite):
-    image = load_image("end.png")
-
     def __init__(self, group):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
-        # Это очень важно !!!
         super().__init__(group)
-        self.image = End.image
+        self.image = load_image("end.png")
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -343,12 +313,10 @@ class End(pygame.sprite.Sprite):
 
 
 class MenuBut(pygame.sprite.Sprite):
-    image = load_image("load.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Load.image
+        self.image = load_image("load.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -358,4 +326,3 @@ class MenuBut(pygame.sprite.Sprite):
     def update(self, *args):
         if args and self.rect.collidepoint(args[0].pos):
             menu_exist()
-
