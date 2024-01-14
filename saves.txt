@@ -1,0 +1,4 @@
+hp = 3
+dmg = 1
+level = 1
+coins = 0
