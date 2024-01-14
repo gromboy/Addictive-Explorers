@@ -43,19 +43,16 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
 
-class BackGround(AnimatedSprite):
-    def __init__(self, sheet, columns, rows, x=0, y=0):
-        super().__init__(sheet, columns, rows, x, y)
-
-    def next_level(self):
-        self.cur_frame = (self.cur_frame + 1) % 5
-        self.image = self.frames[self.cur_frame]
+class BackGround(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__(all_sprites)
+        self.image = load_image('background.png')
+        self.rect = self.image.get_rect()
 
 
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        super().__init__(all_sprites)
-        self.add(coins_on_map)
+        super().__init__(coins_on_map)
         self.image = load_image('coin.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -64,7 +61,7 @@ class Coin(pygame.sprite.Sprite):
     def update(self):
         if pygame.sprite.spritecollideany(hero, coins_on_map):
             hero.coins += 1
-            self.kill()
+            self.remove(coins_on_map)
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -157,7 +154,7 @@ def main():
     # settings
     all_sprites = pygame.sprite.Group()
     clock = pygame.time.Clock()
-    bg = BackGround(load_image('background-sheet.png'), 5, 1)
+    bg = BackGround()
     hero = Hero(load_image("main_character.png"), 4, 7, 0, 0)
     trees = pygame.sprite.Group()
     coins_on_map = pygame.sprite.Group()
@@ -168,7 +165,7 @@ def main():
                       pygame.K_s: pygame.K_DOWN,
                       pygame.K_a: pygame.K_LEFT,
                       pygame.K_d: pygame.K_RIGHT}
-    coins = [(100, 100), (200, 200), (400, 350)]
+    coins = [(200, 100), (200, 200), (400, 350)]
     for x, y in coins:
         Coin(x, y)
     while running:
@@ -186,11 +183,11 @@ def main():
                     pygame.K_DOWN, pygame.K_UP, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_w, pygame.K_a, pygame.K_s,
                     pygame.K_d):
                 hero.stop_move()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                bg.next_level()
         screen.fill('black')
         all_sprites.draw(screen)
         all_sprites.update()
+        coins_on_map.draw(screen)
+        coins_on_map.update()
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()
