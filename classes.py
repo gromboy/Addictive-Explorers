@@ -2,26 +2,40 @@ import pygame
 from load_image import load_image
 
 
-class Hero(pygame.sprite.Sprite):
+class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(all_sprites)  # Инициализация спрайта
+        super().__init__(all_sprites)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
 
-        self.frames = []  # Список кадров анимации героя
-        self.cut_sheet(sheet, columns, rows)  # Вырезаем кадры из спрайта
-        self.cur_frame = 1  # Текущий кадр анимации
-        self.image = self.frames[self.cur_frame]  # Устанавливаем изображение для текущего кадра
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
-        self.rect = self.rect.move(x, y)  # Устанавливаем положение героя на экране
-        self.moving = False  # Флаг для движения героя
-        # Скорость перемещения
+
+class Hero(AnimatedSprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(sheet, columns, rows, x, y)
+        self.moving = False
+        # speed
         self.pix = 9
-        # Направления движения и их соответствующие клавиши
         self.directions = {pygame.K_DOWN: (0, self.pix, 0),
                            pygame.K_UP: (0, -self.pix, 1),
                            pygame.K_LEFT: (-self.pix, 0, 2),
                            pygame.K_RIGHT: (self.pix, 0, 3)}
-        self.direction = pygame.K_UP  # Начальное направление - вверх
-        # Характерестики персонажа
+        self.direction = pygame.K_UP
+        self.new_rect = pygame.sprite.Sprite(all_sprites)
+        self.new_rect.image = pygame.Surface((47, 47), pygame.SRCALPHA, 32)
+        self.new_rect.rect = pygame.Rect(x, y, 47, 47)
+        self.new_rect.mask = pygame.mask.from_surface(self.new_rect.image)
         self.coins = 0
         self.hp = 3
         self.hp_in_battle = self.hp
@@ -34,23 +48,24 @@ class Hero(pygame.sprite.Sprite):
         for j in range(rows - 1):
             for i in range(columns):
                 frame_location = (self.rect.w * i, self.rect.h * j)
-                # Вырезаем кадр из спрайта и добавляем в список кадров анимации
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
 
     # Метод обновления состояния героя
     def update(self):
         if self.moving:
-            # Анимация движения героя
             self.cur_frame = (self.cur_frame + 4) % len(self.frames)
             self.image = self.frames[self.cur_frame]
-            # Вычисляем новое положение героя при движении
             to_move = self.rect.move(*self.directions[self.direction][0:2])
             x, y = to_move.x, to_move.y
-            # Проверка на выход за границы экрана
+            self.new_rect.rect = pygame.Rect(x, y, 47, 47)
+            for i in trees:
+                if pygame.sprite.collide_rect(self.new_rect, i):
+                    return
             if x < 0 or y < 0 or x > width - 47 or y > height - 47:
                 return
             self.rect = to_move
+        print(self.coins)
 
     # Метод для начала движения героя в определенном направлении
     def move(self, direction):
@@ -285,12 +300,10 @@ class Start(pygame.sprite.Sprite):
 
 
 class Load(pygame.sprite.Sprite):
-    image = load_image("load.png")
-
     def __init__(self, group):
         super().__init__(group)
 
-        self.image = Load.image
+        self.image = load_image("load.png")
 
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
