@@ -130,7 +130,7 @@ class Dmgup(pygame.sprite.Sprite):
     def click(self):
         if hero.coins < self.cost:
             my_font = pygame.font.SysFont('Comic Sans MS', 30)
-            text_surface = my_font.render('Недостаточно средств', False, (255, 255, 255))
+            text_surface = my_font.render('Недостаточно средств', False, (255, 0, 0))
             texts_shop.append(text_surface)
         else:
             hero.dmg += 1
@@ -152,7 +152,7 @@ class Hpup(pygame.sprite.Sprite):
     def click(self):
         if hero.coins < self.cost:
             my_font = pygame.font.SysFont('Comic Sans MS', 30)
-            text_surface = my_font.render('Недостаточно средств', False, (255, 255, 255))
+            text_surface = my_font.render('Недостаточно средств', False, (255, 0, 0))
             texts_shop.append(text_surface)
         else:
             hero.regeneration += 1
@@ -451,6 +451,7 @@ def shop_exist():
     size = width, height = 800, 450
     screen_shop = pygame.display.set_mode(size)
     pygame.display.set_icon(screen_shop)
+    shop_font = pygame.font.SysFont('Comic Sans MS', 50)
     texts_shop = []
     while running_shop:
         Shopmenu(all_sprites_shop)
@@ -477,9 +478,13 @@ def shop_exist():
         hp = my_font.render(f'HP: {hero.hp}', False, (255, 0, 0))
         dmg = my_font.render(f'DMG: {hero.dmg}', False, (255, 0, 0))
         money = my_font.render(f'Money: {hero.coins}', False, (255, 0, 0))
+        cost_hpup = shop_font.render(str(hpup.cost), False, 'yellow')
+        cost_dmgup = shop_font.render(str(dmgup.cost), False, 'yellow')
         screen_shop.blit(money, (10, 300))
         screen_shop.blit(hp, (10, 400))
         screen_shop.blit(dmg, (100, 400))
+        screen_shop.blit(cost_hpup, (320, 350))
+        screen_shop.blit(cost_dmgup, (620, 350))
         pygame.display.flip()
 
 
@@ -500,6 +505,7 @@ def battle_exist():
     Heal(all_sprites_battle)
     my_font = pygame.font.SysFont('Comic Sans MS', 30)
     hod = 1
+    dmg_text = my_font.render('', False, (255, 255, 255))
     text_surface = my_font.render('', False, (255, 255, 255))
     damage_from_enemy = my_font.render('', False, (255, 255, 255))
     while running_battle:
@@ -520,7 +526,7 @@ def battle_exist():
                         if isinstance(sprite, Damage) and sprite.rect.collidepoint(event.pos):
                             hod = 0
                             enemy_hp -= hero.dmg
-                            text_surface = my_font.render(f'-{hero.dmg} HP', False, (255, 0, 0))
+                            dmg_text = my_font.render(f'-{hero.dmg} HP', False, (255, 0, 0))
                             break
                     if enemy_hp <= 0:
                         running_battle = False
@@ -535,11 +541,13 @@ def battle_exist():
         if hero.hp_in_battle <= 0:
             running_battle = False
             end_exist()
+
         hp_hero = my_font.render(f'HP: {hero.hp_in_battle}', False, (255, 255, 255))
         hp_enemy = my_font.render(f'HP: {enemy_hp}', False, (255, 255, 255))
         all_sprites_battle.draw(screen_battle)
         screen_battle.blit(text_surface, (10, 5))
         screen_battle.blit(hp_hero, (37, 200))
         screen_battle.blit(hp_enemy, (400, 200))
-        screen_battle.blit(damage_from_enemy, (420, 5))
+        screen_battle.blit(damage_from_enemy, (50, 250))
+        screen_battle.blit(dmg_text, (450, 250))
         pygame.display.flip()
