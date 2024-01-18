@@ -147,7 +147,7 @@ class Hpup(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 198
         self.rect.y = 245
-        self.cost = 30
+        self.cost = 40
 
     def click(self):
         if hero.coins < self.cost:
