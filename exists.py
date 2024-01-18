@@ -240,7 +240,7 @@ class Coin(pygame.sprite.Sprite):
 
     def update(self):
         if pygame.sprite.collide_rect(self, hero):
-            hero.coins += 20
+            hero.coins += 10
             self.kill()
 
 
@@ -389,7 +389,7 @@ def game_exist():
         enemies.update()
         # texts
         my_font = pygame.font.SysFont('Comic Sans MS', 40)
-        money = my_font.render(f'Money: {hero.coins}', False, (0, 0, 0))
+        money = my_font.render(f'Money: {hero.coins}', False, 'yellow')
         screen.blit(money, (10, 380))
         # texts
         pygame.display.flip()
@@ -475,9 +475,9 @@ def shop_exist():
         for text in texts_shop:
             screen_shop.blit(text, (100, 0))
         my_font = pygame.font.SysFont('Comic Sans MS', 20)
-        hp = my_font.render(f'HP: {hero.hp}', False, (255, 0, 0))
+        hp = my_font.render(f'HPR: {hero.hp}', False, (0, 255, 0))
         dmg = my_font.render(f'DMG: {hero.dmg}', False, (255, 0, 0))
-        money = my_font.render(f'Money: {hero.coins}', False, (255, 0, 0))
+        money = my_font.render(f'Money: {hero.coins}', False, 'yellow')
         cost_hpup = shop_font.render(str(hpup.cost), False, 'yellow')
         cost_dmgup = shop_font.render(str(dmgup.cost), False, 'yellow')
         screen_shop.blit(money, (10, 300))
@@ -519,9 +519,9 @@ def battle_exist():
                             if hero.hp_in_battle != hero.hp:
                                 hero.hp_in_battle += hero.regeneration
                                 hod = 0
-                                text_surface = my_font.render('+1 HP', False, (0, 255, 0))
+                                text_surface = my_font.render(f'+{hero.regeneration} HP', False, (0, 255, 0))
                             else:
-                                text_surface = my_font.render('У вас максимальное здоровье', False, (255, 0, 0))
+                                text_surface = my_font.render('У вас максимальное здоровье', False, (0, 255, 0))
                             break
                         if isinstance(sprite, Damage) and sprite.rect.collidepoint(event.pos):
                             hod = 0
@@ -530,7 +530,7 @@ def battle_exist():
                             break
                     if enemy_hp <= 0:
                         running_battle = False
-                        hero.coins += 50
+                        hero.coins += 25
         else:
             damage = randint(1, 2)
             hero.hp_in_battle -= damage
