@@ -3,7 +3,7 @@ import sys
 
 from exists import shop_exist, battle_exist, game_exist, menu_exist, end_exist
 from load_image import load_image
-from classes import (Hero, Shop, Coin, Monster, Shopmenu, Hpup, Dmgup, Exit, Battle, Heal, Damage, Menu, Start,
+from exists import (Hero, Shop, Coin, Monster, Shopmenu, Hpup, Dmgup, Battle, Heal, Damage, Menu, Start,
                      End, Load, MenuBut)
 from progress import save_progress, load_progress
 import pygame
@@ -134,7 +134,6 @@ class Hero(AnimatedSprite):
             if x < 0 or y < 0 or x > width - 47 or y > height - 47:
                 return
             self.rect = to_move
-        print(self.coins)
 
     def move(self, direction):
         self.moving = True
@@ -169,7 +168,7 @@ class Tree(AnimatedSprite):
 def main():
     # settings
     global all_sprites, width, height, trees, screen, coins_on_map, hero
-    size = width, height = 800, 450
+
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Addictive Explorers')
     running = True
