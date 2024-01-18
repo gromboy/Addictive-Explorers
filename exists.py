@@ -2,8 +2,80 @@ from random import randint
 
 import pygame
 from load_image import load_image
+from set_default import options
 
-FPS = 25
+
+def load_progress():
+    global LEVEL
+    with open('saves.txt', encoding='utf8') as f:
+        text = f.readlines()
+
+    text = [i.strip() for i in text]
+    for i in range(len(text)):
+        if i == 0:
+            hp = text[i].split(' = ')[1]
+            hero.hp = int(hp)
+        if i == 1:
+            dmg = text[i].split(' = ')[1]
+            hero.dmg = int(dmg)
+        if i == 2:
+            LEVEL = int(text[i].split(' = ')[1])
+        if i == 3:
+            coins = text[i].split(' = ')[1]
+            hero.coins = int(coins)
+        if i == 4:
+            reg = text[i].split(' = ')[1]
+            hero.regeneration = int(reg)
+
+
+def save_progress():
+    with open('saves.txt', 'wt', encoding='utf8') as f:
+        f.write(
+            f'hp = {hero.hp}\ndmg = {hero.dmg}\nlevel = {LEVEL}\ncoins = {hero.coins}\nregeneration = {hero.regeneration}')
+
+
+def level1():
+    Coin(400, 130)
+    Coin(170, 30)
+    Coin(380, 280)
+    Monster(220, 270)
+    Monster(500, 300)
+    Tree(load_image('trees.png'), 100, 100, 0, trees)
+    Tree(load_image('trees.png'), 300, 100, 1, trees)
+    Tree(load_image('trees.png'), 400, 320, 1, trees)
+    Tree(load_image('trees.png'), 530, 80, 0, trees)
+
+
+def level2():
+    Coin(200, 230)
+    Coin(450, 30)
+    Monster(110, 300)
+    Monster(590, 230)
+    Monster(330, 150)
+    Tree(load_image('trees.png'), 100, 100, 0, trees)
+    Tree(load_image('trees.png'), 200, 0, 1, trees)
+    Tree(load_image('trees.png'), 400, 320, 1, trees)
+    Tree(load_image('trees.png'), 530, 80, 0, trees)
+    Tree(load_image('trees.png'), 530, 80, 0, trees)
+
+
+def level3():
+    Coin(200, 230)
+    Monster(110, 300)
+    Monster(590, 280)
+    Monster(330, 150)
+    Monster(300, 330)
+    Tree(load_image('trees.png'), 80, 130, 0, trees)
+    Tree(load_image('trees.png'), 200, 0, 1, trees)
+    Tree(load_image('trees.png'), 480, 260, 1, trees)
+    Tree(load_image('trees.png'), 530, 80, 0, trees)
+    Tree(load_image('trees.png'), 580, 190, 0, trees)
+
+
+FPS = 15
+LEVELS = [level1, level2, level3]
+levels_enemy_hp = {0: 5, 1: 8, 2: 11}
+LEVEL = 0
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -184,18 +256,23 @@ class Monster(pygame.sprite.Sprite):
     def update(self):
         if pygame.sprite.collide_rect(self, hero):
             self.kill()
-            battle_exist()
+            battle_exist(levels_enemy_hp[LEVEL])
 
 
 class NextLevel(pygame.sprite.Sprite):
-    def __init__(self, group):
-        super().__init__(group)
-
-        self.image = load_image("battle.png")
-
+    def __init__(self):
+        super().__init__(all_sprites)
+        self.image = load_image("portal.png")
         self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
+        self.rect.x = 740
+        self.rect.y = 200
+
+    def update(self):
+        global LEVEL
+        if pygame.sprite.collide_rect(self, hero) and not enemies:
+            LEVEL += 1
+            save_progress()
+            game_exist()
 
 
 class Battle(pygame.sprite.Sprite):
@@ -267,6 +344,7 @@ class Start(pygame.sprite.Sprite):
 
     def update(self, *args):
         if args and self.rect.collidepoint(args[0].pos):
+            options()
             game_exist()
 
 
@@ -283,7 +361,7 @@ class Load(pygame.sprite.Sprite):
 
     def update(self, *args):
         if args and self.rect.collidepoint(args[0].pos):
-            load_progress()
+            game_exist()
 
 
 class End(pygame.sprite.Sprite):
@@ -357,13 +435,14 @@ def game_exist():
                       pygame.K_a: pygame.K_LEFT,
                       pygame.K_d: pygame.K_RIGHT}
     coins_on_map = pygame.sprite.Group()
-    Coin(50, 30)
-    Coin(150, 30)
-    Monster(300, 300)
+
     hero = Hero(load_image("main_character.png"), 4, 7, 0, 0)
-    Tree(load_image('trees.png'), 100, 100, 0, trees)
-    Tree(load_image('trees.png'), 300, 100, 1, trees)
-    Tree(load_image('trees.png'), 200, 350, 1, trees)
+    try:
+        load_progress()
+    except FileNotFoundError:
+        pass
+    LEVELS[LEVEL]()
+    NextLevel()
     # Основной игровой цикл
     while running:
         for event in pygame.event.get():
@@ -483,16 +562,15 @@ def shop_exist():
         pygame.display.flip()
 
 
-def battle_exist():
+def battle_exist(enemy_hp=5):
     hero.stop_move()
-    global screen_battle, enemy_hp
+    global screen_battle
     running_battle = True
     size = width, height = 800, 450
     screen_battle = pygame.display.set_mode(size)
     pygame.display.set_caption("Battle Window")
     pygame.display.set_icon(pygame.Surface((32, 32)))
 
-    enemy_hp = 5
     hero.hp_in_battle = hero.hp
 
     Battle(all_sprites_battle)
@@ -513,7 +591,7 @@ def battle_exist():
                             if hero.hp_in_battle != hero.hp:
                                 hero.hp_in_battle += hero.regeneration
                                 hod = 0
-                                text_surface = my_font.render('+1 HP', False, (0, 255, 0))
+                                text_surface = my_font.render(f'+{hero.regeneration} HP', False, (0, 255, 0))
                             else:
                                 text_surface = my_font.render('У вас максимальное здоровье', False, (255, 0, 0))
                             break

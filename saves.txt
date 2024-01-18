@@ -1,4 +1,5 @@
-hp = 3
-dmg = 1
-level = 1
-coins = 0
+hp = 5
+    dmg = 1
+    level = 0
+    coins = 0
+    regeneration = 1
