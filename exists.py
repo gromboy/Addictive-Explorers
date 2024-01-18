@@ -72,8 +72,22 @@ def level3():
     Tree(load_image('trees.png'), 580, 190, 0, trees)
 
 
+def finish():
+    finish_sprites = pygame.sprite.Group()
+    win_screen = pygame.sprite.Sprite(finish_sprites)
+    win_screen.image = load_image('final.png')
+    win_screen.rect = win_screen.image.get_rect()
+    finish_sprites.draw(pygame.display.set_mode((800, 450)))
+    pygame.display.flip()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+
 FPS = 15
-LEVELS = [level1, level2, level3]
+LEVELS = [level1, level2, level3, finish]
 levels_enemy_hp = {0: 5, 1: 8, 2: 11}
 LEVEL = 0
 
@@ -270,9 +284,7 @@ class NextLevel(pygame.sprite.Sprite):
 
     def update(self):
         global LEVEL
-        if LEVEL == 2:
-            finish()
-        elif pygame.sprite.collide_rect(self, hero) and not enemies:
+        if pygame.sprite.collide_rect(self, hero) and not enemies:
             LEVEL += 1
             save_progress()
             game_exist()
@@ -320,7 +332,7 @@ class Coin(pygame.sprite.Sprite):
 
     def update(self):
         if pygame.sprite.collide_rect(self, hero):
-            hero.coins += 10
+            hero.coins += 15
             self.kill()
 
 
@@ -450,6 +462,7 @@ def game_exist():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
                 exit()
             if event.type == pygame.KEYDOWN and event.key in (
                     pygame.K_DOWN, pygame.K_UP, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_w, pygame.K_a, pygame.K_s,
@@ -489,6 +502,7 @@ def rules(screen_):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                 return
@@ -498,7 +512,7 @@ def menu_exist():
     pygame.display.set_caption('Addictive Explorers')  # Установка заголовка окна
     size = width, height = 800, 450
     screen_menu = pygame.display.set_mode(size)
-    pygame.display.set_icon(screen_menu)
+    pygame.display.set_icon(load_image('hero_fighter.png'))
     all_sprites_menu = pygame.sprite.Group()
     running_menu = True
     rules(screen_menu)
@@ -511,6 +525,7 @@ def menu_exist():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for sprite in all_sprites_menu:
@@ -525,7 +540,7 @@ def end_exist():
 
     size = width, height = 800, 450
     screen_end = pygame.display.set_mode(size)
-    pygame.display.set_icon(screen_end)
+    pygame.display.set_icon(load_image('hero_fighter.png'))
     End(all_sprites_end)
     MenuBut(all_sprites_end)
 
@@ -547,7 +562,7 @@ def shop_exist():
     pygame.font.init()
     size = width, height = 800, 450
     screen_shop = pygame.display.set_mode(size)
-    pygame.display.set_icon(screen_shop)
+    pygame.display.set_icon(load_image('hero_fighter.png'))
     shop_font = pygame.font.SysFont('Comic Sans MS', 50)
     texts_shop = []
     while running_shop:
@@ -557,6 +572,7 @@ def shop_exist():
         hpup = Hpup(all_sprites_shop)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for sprite in all_sprites_shop:
@@ -592,7 +608,7 @@ def battle_exist(enemy_hp=5):
     size = width, height = 800, 450
     screen_battle = pygame.display.set_mode(size)
     pygame.display.set_caption("Battle Window")
-    pygame.display.set_icon(pygame.Surface((32, 32)))
+    pygame.display.set_icon(load_image('hero_fighter.png'))
 
     hero.hp_in_battle = hero.hp
 
@@ -608,6 +624,7 @@ def battle_exist(enemy_hp=5):
         if hod:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    pygame.quit()
                     exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for sprite in all_sprites_battle:
@@ -628,7 +645,12 @@ def battle_exist(enemy_hp=5):
                         running_battle = False
                         hero.coins += 25
         else:
-            damage = randint(1, 2)
+            if LEVEL == 0:
+                damage = randint(1, 2)
+            elif LEVEL == 1:
+                damage = randint(3, 4)
+            else:
+                damage = randint(4, 5)
             hero.hp_in_battle -= damage
             damage_from_enemy = my_font.render(f'-{damage} HP', False, (255, 0, 0))
 
@@ -647,14 +669,3 @@ def battle_exist(enemy_hp=5):
         screen_battle.blit(damage_from_enemy, (50, 250))
         screen_battle.blit(dmg_text, (450, 250))
         pygame.display.flip()
-
-
-def finish():
-    finish_sprites = pygame.sprite.Group()
-    win_screen = pygame.sprite.Sprite(finish_sprites)
-    win_screen.image = load_image('final.png')
-    win_screen.rect = win_screen.image.get_rect()
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
