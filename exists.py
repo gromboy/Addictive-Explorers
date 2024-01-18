@@ -228,6 +228,7 @@ class Hpup(pygame.sprite.Sprite):
             texts_shop.append(text_surface)
         else:
             hero.regeneration += 1
+            hero.hp += 2
             hero.coins -= self.cost
             texts_shop.clear()
 
@@ -269,7 +270,9 @@ class NextLevel(pygame.sprite.Sprite):
 
     def update(self):
         global LEVEL
-        if pygame.sprite.collide_rect(self, hero) and not enemies:
+        if LEVEL == 2:
+            finish()
+        elif pygame.sprite.collide_rect(self, hero) and not enemies:
             LEVEL += 1
             save_progress()
             game_exist()
@@ -476,6 +479,21 @@ def game_exist():
     pygame.quit()
 
 
+def rules(screen_):
+    sprites = pygame.sprite.Group()
+    sprite = pygame.sprite.Sprite(sprites)
+    sprite.image = load_image('rules.png')
+    sprite.rect = sprite.image.get_rect()
+    sprites.draw(screen_)
+    pygame.display.flip()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                return
+
+
 def menu_exist():
     pygame.display.set_caption('Addictive Explorers')  # Установка заголовка окна
     size = width, height = 800, 450
@@ -483,7 +501,7 @@ def menu_exist():
     pygame.display.set_icon(screen_menu)
     all_sprites_menu = pygame.sprite.Group()
     running_menu = True
-
+    rules(screen_menu)
     while running_menu:
         Menu(all_sprites_menu)
         Load(all_sprites_menu)
@@ -554,7 +572,7 @@ def shop_exist():
         for text in texts_shop:
             screen_shop.blit(text, (100, 0))
         my_font = pygame.font.SysFont('Comic Sans MS', 20)
-        hp = my_font.render(f'HPR: {hero.hp}', False, (0, 255, 0))
+        hp = my_font.render(f'HP: {hero.hp}', False, (0, 255, 0))
         dmg = my_font.render(f'DMG: {hero.dmg}', False, (255, 0, 0))
         money = my_font.render(f'Money: {hero.coins}', False, 'yellow')
         cost_hpup = shop_font.render(str(hpup.cost), False, 'yellow')
@@ -629,3 +647,14 @@ def battle_exist(enemy_hp=5):
         screen_battle.blit(damage_from_enemy, (50, 250))
         screen_battle.blit(dmg_text, (450, 250))
         pygame.display.flip()
+
+
+def finish():
+    finish_sprites = pygame.sprite.Group()
+    win_screen = pygame.sprite.Sprite(finish_sprites)
+    win_screen.image = load_image('final.png')
+    win_screen.rect = win_screen.image.get_rect()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
